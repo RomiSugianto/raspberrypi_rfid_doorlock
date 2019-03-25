@@ -19,10 +19,10 @@ servoPIN = 8
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(servoPIN, GPIO.OUT)
 
-def on():
+def lockdoor():
     GPIO.output(8, GPIO.HIGH)
     return;
-def off():
+def opendoor():
     GPIO.output(8, GPIO.LOW)
     return;
 
@@ -33,7 +33,7 @@ continue_reading = True
 
 def end_read(signal,frame):
     global continue_reading
-    print "Ctrl+C captured, ending read."
+    print("Ctrl+C captured, ending read.")
     continue_reading = False
     GPIO.cleanup()
 
@@ -50,7 +50,7 @@ while continue_reading:
 
     # If a card is found
     if status == MIFAREReader.MI_OK:
-        print "Card detected"
+        print("Card detected")
 
     # Get the UID of the card
     (status,uid) = MIFAREReader.MFRC522_Anticoll()
@@ -60,7 +60,7 @@ while continue_reading:
 
         # Print UID
         UIDcode = str(uid[0])+str(uid[1])+str(uid[2])+str(uid[3])
-        print UIDcode
+        print(UIDcode)
 
         # Control door lock
         statusFile = open('/home/pi/virtualenv/rfid/MFRC522-python/status.txt', 'r')
@@ -78,36 +78,36 @@ while continue_reading:
         if UIDcode == adminid or UIDcode == lisacard or UIDcode == colincard:
             if locked == '0' or adminpriv == 1:
                 # p.ChangeDutyCycle(5)
-                on()
-                print "Door open"
+                opendoor()
+                print("Door open")
                 time.sleep(3)
                 # p.ChangeDutyCycle(12.5)
-                off()
-                print "Finished"
+                lockdoor()
+                print("Finished")
             else:
-                print "Door locked"
+                print("Door locked")
         elif UIDcode == lockcard:
             counter = 0
             if locked == '0':
-                while counter <> 5:
+                while counter != 5:
                     # p.ChangeDutyCycle(5)
-                    on()
+                    opendoor()
                     time.sleep(0.05)
                     # p.ChangeDutyCycle(12.5)
-                    off()
+                    lockdoor()
                     time.sleep(0.05)
-                    counter = counter + 1
+                    ++counter
                 locked = 1
                 time.sleep(3)
             else:
-                while counter <> 2:
+                while counter != 2:
                     # p.ChangeDutyCycle(12.5)
-                    off()
+                    lockdoor()
                     time.sleep(0.5)
                     # p.ChangeDutyCycle(5)
-                    on()
+                    opendoor()
                     time.sleep(0.05)
-                    counter = counter + 1
+                    ++counter
                 locked = 0
                 time.sleep(3)
 
@@ -116,4 +116,4 @@ while continue_reading:
             fh.close()
 
         else:
-            print "Unrecognised Card"
+            print("Unrecognised Card")
