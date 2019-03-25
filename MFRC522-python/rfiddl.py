@@ -5,19 +5,22 @@ import RPi.GPIO as GPIO
 import MFRC522
 import signal
 import time
+import pymysql
+
+#sett mysql access
+con = pymysql.connect(db="absen", user="user", passwd="user",host="10.10.0.163",port=3306,autocommit=True)
+
+print ("connect successful!!")
 
 # Card Register
 
 adminid = '1711792300'
 lockcard = '895212290'
-lisacard = '2222'
-colincard = '1111'
-
 #GPIO setup
 
-servoPIN = 8
+digitalPIN = 8
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(servoPIN, GPIO.OUT)
+GPIO.setup(digitalPIN, GPIO.OUT)
 
 def lockdoor():
     GPIO.output(8, GPIO.HIGH)
@@ -25,9 +28,6 @@ def lockdoor():
 def opendoor():
     GPIO.output(8, GPIO.LOW)
     return;
-
-# p = GPIO.PWM(servoPIN, 50) # GPIO 17 for PWM with 50Hz
-# p.start(2.5) # Initialization
 
 continue_reading = True
 
@@ -77,11 +77,9 @@ while continue_reading:
 
         if UIDcode == adminid or UIDcode == lisacard or UIDcode == colincard:
             if locked == '0' or adminpriv == 1:
-                # p.ChangeDutyCycle(5)
                 opendoor()
                 print("Door open")
                 time.sleep(3)
-                # p.ChangeDutyCycle(12.5)
                 lockdoor()
                 print("Finished")
             else:
@@ -90,24 +88,20 @@ while continue_reading:
             counter = 0
             if locked == '0':
                 while counter != 5:
-                    # p.ChangeDutyCycle(5)
                     opendoor()
                     time.sleep(0.05)
-                    # p.ChangeDutyCycle(12.5)
                     lockdoor()
                     time.sleep(0.05)
-                    ++counter
+                    counter += 1
                 locked = 1
                 time.sleep(3)
             else:
                 while counter != 2:
-                    # p.ChangeDutyCycle(12.5)
                     lockdoor()
                     time.sleep(0.5)
-                    # p.ChangeDutyCycle(5)
                     opendoor()
                     time.sleep(0.05)
-                    ++counter
+                    counter += 1
                 locked = 0
                 time.sleep(3)
 
